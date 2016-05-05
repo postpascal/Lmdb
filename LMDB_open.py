@@ -1,15 +1,24 @@
 #!/usr/bin/python
-import numpy as np
-import lmdb
 import caffe
+import lmdb
+import numpy as np
+import caffe.proto.caffe_pb2
+from caffe.io import datum_to_array
 
-env = lmdb.open('mylmdb', readonly=True)
-with env.begin() as txn:
-    raw_datum = txn.get(b'00000000')
-
+lmdb_env = lmdb.open('/home/keke/AC_caffe/Acre/Acre_test_lmdb')
+lmdb_txn = lmdb_env.begin()
+lmdb_cursor = lmdb_txn.cursor()
 datum = caffe.proto.caffe_pb2.Datum()
-datum.ParseFromString(raw_datum)
 
-flat_x = np.fromstring(datum.data, dtype=np.uint8)
-x = flat_x.reshape(datum.channels, datum.height, datum.width)
-y = datum.label
+i=0
+for key, value in lmdb_cursor:
+    datum.ParseFromString(value)
+    label = datum.label
+    print "label is :",label
+    data = caffe.io.datum_to_array(datum)
+    time.sleep(1)
+    for d in data:
+	print np.shape(d)
+        print "image is:",d[200,200]
+        print i
+        i=i+1
